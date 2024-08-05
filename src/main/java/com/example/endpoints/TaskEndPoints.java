@@ -10,10 +10,13 @@ import com.example.entity.task.Task;
 import com.example.entity.user.RpUser;
 import com.example.exceptions.NoDataException;
 import com.example.exceptions.NotAvailableException;
+import com.example.exceptions.NotValidParam;
 import com.example.response.BasicResponce;
 import com.example.response.entityResponse.TaskEntityResponse;
 import com.example.security.JwtUtils;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -50,7 +53,7 @@ public class TaskEndPoints {
         return ResponseEntity.ok(new BasicResponce<>(jwt, TaskEntityResponse.from(task.get())));
     }
     @PostMapping("/{id}/addComment")
-    public ResponseEntity<?> addComment(@PathVariable UUID id, @RequestBody CommentDto commentDto, HttpServletRequest request) throws SQLException, NoDataException, NotAvailableException {
+    public ResponseEntity<?> addComment(@PathVariable UUID id, @Valid @RequestBody CommentDto commentDto, HttpServletRequest request) throws SQLException, NoDataException {
         String jwt = jwtUtils.getJwtToken(request);
         rpComment.add(commentDto, UUID.fromString(jwtUtils.getIdFromJwtToken(jwt)), id);
         Optional<Task> task = rpTask.get(id);

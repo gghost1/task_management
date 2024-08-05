@@ -3,9 +3,13 @@ package com.example.endpoints;
 import com.example.dto.UserDto;
 import com.example.entity.user.RpUser;
 import com.example.entity.user.User;
+import com.example.exceptions.NoDataException;
+import com.example.exceptions.NotValidParam;
+import com.example.response.BasicResponce;
 import com.example.security.JwtUtils;
 import com.example.security.SecurityConfig;
 import com.example.security.UserEntityDetails;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +17,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
@@ -37,11 +42,11 @@ public class AnonymousEndPoints {
     RpUser rpUser = new RpUser(dataSource);
 
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserDto userDto) throws SQLException {
+    public ResponseEntity<?> register(@Valid @RequestBody UserDto userDto) throws SQLException, NoDataException, NotValidParam {
 
             Optional<User> user = rpUser.getByEmail(userDto.email());
             if (user.isPresent()) {
-                return ResponseEntity.badRequest().body("User already exists");
+                throw new NotValidParam("User already exists");
             }
 
             rpUser.add(userDto);
@@ -49,11 +54,11 @@ public class AnonymousEndPoints {
         return login(userDto);
     }
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody UserDto userDto) throws SQLException {
+    public ResponseEntity<?> login(@Valid @RequestBody UserDto userDto) throws SQLException, NoDataException {
 
         Optional<User> userOpt = rpUser.getByEmail(userDto.email());
         if (userOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body("User not found");
+            throw new NoDataException("User not found");
         }
 
         User user = userOpt.get();
@@ -64,7 +69,7 @@ public class AnonymousEndPoints {
         String jwt = jwtUtils.generateJwtToken(authentication);
 
 
-        return ResponseEntity.ok(jwt);
+        return ResponseEntity.ok(new BasicResponce<>(jwt, "User logged in successfully"));
 
     }
 
