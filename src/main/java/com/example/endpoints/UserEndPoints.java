@@ -1,6 +1,7 @@
 package com.example.endpoints;
 
 
+import com.example.dto.PaginationDto;
 import com.example.entity.user.RpUser;
 import com.example.entity.user.User;
 import com.example.exceptions.NoDataException;
@@ -34,9 +35,10 @@ public class UserEndPoints {
 
 
     @GetMapping("/")
-    public ResponseEntity<?> getUsers(HttpServletRequest request) throws SQLException {
+    public ResponseEntity<?> getUsers(@Valid PaginationDto paginationDto, HttpServletRequest request) throws SQLException {
         String jwt = jwtUtils.getJwtToken(request);
-        return ResponseEntity.ok(new BasicResponce<>(jwt, UserEntityResponse.from(rpUser.getAll())));
+
+        return ResponseEntity.ok(new BasicResponce<>(jwt, UserEntityResponse.from(rpUser.getAll(paginationDto))));
     }
 
     @GetMapping("/{id}")

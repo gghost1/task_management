@@ -1,5 +1,6 @@
 package com.example.entity.user;
 
+import com.example.dto.PaginationDto;
 import com.example.dto.UserDto;
 import com.example.entity.task.RpTask;
 import com.example.security.SecurityConfig;
@@ -65,12 +66,15 @@ public class RpUser {
                     }
                 });
     }
-    public List<User> getAll() throws SQLException {
+    public List<User> getAll(PaginationDto paginationDto) throws SQLException {
         JdbcSession jdbcSession = new JdbcSession(dataSource);
         return jdbcSession
                 .sql("""
                         SELECT id, email, password FROM users
+                        LIMIT ? OFFSET ?
                         """)
+                .set(paginationDto.size())
+                .set(paginationDto.offset())
                 .select((rset, stmt) -> {
                     List<User> users = new ArrayList<>();
                     while (rset.next()) {

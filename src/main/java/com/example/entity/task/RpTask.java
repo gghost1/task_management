@@ -1,5 +1,6 @@
 package com.example.entity.task;
 
+import com.example.dto.PaginationDto;
 import com.example.dto.TaskDto;
 import com.example.entity.comment.RpComment;
 import com.example.entity.elements.Priority;
@@ -115,12 +116,15 @@ public class RpTask {
                 });
     }
 
-    public List<Task> getAll() throws SQLException {
+    public List<Task> getAll(PaginationDto paginationDto) throws SQLException {
         JdbcSession jdbcSession = new JdbcSession(dataSource);
 
         return jdbcSession.sql("""
                 SELECT id, title, description, status, priority FROM tasks
+                LIMIT ? OFFSET ?
                 """)
+                .set(paginationDto.size())
+                .set(paginationDto.offset())
                 .select((rset, stmt) -> {
                     List<Task> tasks = new ArrayList<>();
                     while (rset.next()) {

@@ -2,6 +2,7 @@ package com.example.endpoints;
 
 
 import com.example.dto.CommentDto;
+import com.example.dto.PaginationDto;
 import com.example.entity.comment.RpComment;
 import com.example.entity.elements.Priority;
 import com.example.entity.elements.Status;
@@ -36,10 +37,10 @@ public class TaskEndPoints {
     RpComment rpComment;
 
     @GetMapping("/")
-    public ResponseEntity<?> getTasks(HttpServletRequest request) throws SQLException {
+    public ResponseEntity<?> getTasks(@Valid PaginationDto paginationDto, HttpServletRequest request) throws SQLException {
         String jwt = jwtUtils.getJwtToken(request);
 
-        return ResponseEntity.ok(new BasicResponce<>(jwt, TaskEntityResponse.from(rpTask.getAll())));
+        return ResponseEntity.ok(new BasicResponce<>(jwt, TaskEntityResponse.from(rpTask.getAll(paginationDto))));
     }
     @GetMapping("/{id}")
     public ResponseEntity<?> getTask(@PathVariable UUID id, HttpServletRequest request) throws SQLException, NoDataException {
