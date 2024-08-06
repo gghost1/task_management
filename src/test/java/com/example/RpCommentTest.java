@@ -1,27 +1,14 @@
 package com.example;
 
 import com.example.db.InitializedTestContainer;
-import com.example.dto.CommentDto;
-import com.example.dto.TaskDto;
-import com.example.dto.UserDto;
-import com.example.entity.comment.Comment;
-import com.example.entity.comment.CommentEntity;
-import com.example.entity.comment.RpComment;
-import com.example.entity.elements.Priority;
-import com.example.entity.elements.Status;
-import com.example.entity.task.RpTask;
-import com.example.entity.user.RpUser;
-import com.example.exceptions.NoDataException;
-import com.jcabi.jdbc.JdbcSession;
+import com.example.data.entity.comment.RpComment;
+import com.example.data.entity.task.RpTask;
+import com.example.data.entity.user.RpUser;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import javax.sql.DataSource;
-import java.sql.SQLException;
-import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

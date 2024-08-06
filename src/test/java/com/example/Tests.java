@@ -1,22 +1,23 @@
 package com.example;
 
 import com.example.db.InitializedTestContainer;
-import com.example.dto.CommentDto;
-import com.example.dto.TaskDto;
-import com.example.dto.UserDto;
-import com.example.entity.comment.Comment;
-import com.example.entity.comment.CommentEntity;
-import com.example.entity.comment.RpComment;
-import com.example.entity.elements.Priority;
-import com.example.entity.elements.Status;
-import com.example.entity.task.RpTask;
-import com.example.entity.task.Task;
-import com.example.entity.task.TaskEntity;
-import com.example.entity.user.RpUser;
-import com.example.entity.user.User;
-import com.example.entity.user.UserEntity;
-import com.example.exceptions.NoDataException;
-import com.example.exceptions.NotAvailableException;
+import com.example.data.request.CommentEntityRequest;
+import com.example.data.request.PaginationEntityRequest;
+import com.example.data.request.TaskEntityRequest;
+import com.example.data.request.UserEntityRequest;
+import com.example.data.entity.comment.Comment;
+import com.example.data.entity.comment.CommentEntity;
+import com.example.data.entity.comment.RpComment;
+import com.example.data.entity.elements.Priority;
+import com.example.data.entity.elements.Status;
+import com.example.data.entity.task.RpTask;
+import com.example.data.entity.task.Task;
+import com.example.data.entity.task.TaskEntity;
+import com.example.data.entity.user.RpUser;
+import com.example.data.entity.user.User;
+import com.example.data.entity.user.UserEntity;
+import com.example.configuration.exception.NoDataException;
+import com.example.configuration.exception.NotAvailableException;
 import com.jcabi.jdbc.JdbcSession;
 import com.jcabi.jdbc.SingleOutcome;
 import org.junit.jupiter.api.BeforeEach;
@@ -41,12 +42,14 @@ public class Tests extends InitializedTestContainer {
     private RpComment rpComment;
     private RpUser rpUser;
     private RpTask rpTask;
+    private PaginationEntityRequest paginationEntityRequest;
 
     @BeforeEach
     public void init() {
         rpUser = new RpUser(dataSource);
         rpTask = new RpTask(dataSource);
         rpComment = new RpComment(dataSource);
+        paginationEntityRequest = new PaginationEntityRequest(0, 5);
     }
 
     @Test
@@ -66,15 +69,14 @@ public class Tests extends InitializedTestContainer {
             throw new RuntimeException(e);
         }
 
-        TaskDto taskDto = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest = new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         );
 
-        Task task = rpTask.add(taskDto, user_id);
+        Task task = rpTask.add(taskEntityRequest, user_id);
 
         Task expected = jdbcSession.sql("SELECT * FROM tasks WHERE id = ?")
                 .set(task.id())
@@ -119,14 +121,13 @@ public class Tests extends InitializedTestContainer {
                 .set("test1")
                 .set("test1")
                 .insert(new SingleOutcome<>(UUID.class));
-        TaskDto taskDto = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest = new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         );
-        Task task = rpTask.add(taskDto, user_id);
+        Task task = rpTask.add(taskEntityRequest, user_id);
         Optional<Task> expected = rpTask.get(task.id());
 
         if (expected.isEmpty()) {
@@ -153,14 +154,13 @@ public class Tests extends InitializedTestContainer {
                 .set("test2")
                 .set("test2")
                 .insert(new SingleOutcome<>(UUID.class));
-        TaskDto taskDto = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest = new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         );
-        Task task = rpTask.add(taskDto, user_id);
+        Task task = rpTask.add(taskEntityRequest, user_id);
 
         rpTask.assign(task.id(), user_id1, user_id);
 
@@ -198,14 +198,13 @@ public class Tests extends InitializedTestContainer {
                 .set("test2")
                 .insert(new SingleOutcome<>(UUID.class));
 
-        TaskDto taskDto = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest = new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         );
-        Task task = rpTask.add(taskDto, user_id);
+        Task task = rpTask.add(taskEntityRequest, user_id);
 
         try {
             rpTask.assign(task.id(), user_id1, user_id1);
@@ -225,14 +224,13 @@ public class Tests extends InitializedTestContainer {
                 .set("test1")
                 .insert(new SingleOutcome<>(UUID.class));
 
-        TaskDto taskDto = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest = new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         );
-        Task task = rpTask.add(taskDto, user_id);
+        Task task = rpTask.add(taskEntityRequest, user_id);
         rpTask.delete(task.id(), user_id);
         assertEquals(Optional.empty(), rpTask.get(task.id()));
     }
@@ -253,14 +251,13 @@ public class Tests extends InitializedTestContainer {
                 .set("test2")
                 .set("test2")
                 .insert(new SingleOutcome<>(UUID.class));
-        TaskDto taskDto = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest = new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         );
-        Task task = rpTask.add(taskDto, user_id);
+        Task task = rpTask.add(taskEntityRequest, user_id);
         try {
             rpTask.delete(task.id(), user_id1);
         } catch (NotAvailableException e) {
@@ -279,14 +276,13 @@ public class Tests extends InitializedTestContainer {
                 .set("test1")
                 .set("test1")
                 .insert(new SingleOutcome<>(UUID.class));
-        TaskDto taskDto = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest = new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         );
-        Task task = rpTask.add(taskDto, user_id);
+        Task task = rpTask.add(taskEntityRequest, user_id);
         rpTask.editTitle(task.id(), "NEW TITLE", user_id);
         assertEquals("NEW TITLE", jdbcSession.sql("""
                         SELECT title FROM tasks
@@ -330,14 +326,13 @@ public class Tests extends InitializedTestContainer {
                 .set("test1")
                 .set("test1")
                 .insert(new SingleOutcome<>(UUID.class));
-        TaskDto taskDto = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest = new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         );
-        Task task = rpTask.add(taskDto, user_id);
+        Task task = rpTask.add(taskEntityRequest, user_id);
         try {
             rpTask.editTitle(task.id(), "NEW TITLE", user_id1);
         } catch (NotAvailableException e) {
@@ -356,14 +351,13 @@ public class Tests extends InitializedTestContainer {
                 .set("test1")
                 .set("test1")
                 .insert(new SingleOutcome<>(UUID.class));
-        TaskDto taskDto = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest = new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         );
-        Task task = rpTask.add(taskDto, user_id);
+        Task task = rpTask.add(taskEntityRequest, user_id);
         rpTask.editDescription(task.id(), "NEW Description", user_id);
         assertEquals("NEW Description", jdbcSession.sql("""
                         SELECT description FROM tasks
@@ -407,14 +401,13 @@ public class Tests extends InitializedTestContainer {
                 .set("test1")
                 .set("test1")
                 .insert(new SingleOutcome<>(UUID.class));
-        TaskDto taskDto = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest = new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         );
-        Task task = rpTask.add(taskDto, user_id);
+        Task task = rpTask.add(taskEntityRequest, user_id);
         try {
             rpTask.editDescription(task.id(), "NEW Description", user_id1);
         } catch (NotAvailableException e) {
@@ -433,14 +426,13 @@ public class Tests extends InitializedTestContainer {
                 .set("test1")
                 .set("test1")
                 .insert(new SingleOutcome<>(UUID.class));
-        TaskDto taskDto = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest = new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         );
-        Task task = rpTask.add(taskDto, user_id);
+        Task task = rpTask.add(taskEntityRequest, user_id);
         rpTask.editPriority(task.id(), Priority.medium, user_id);
         assertEquals(Priority.medium, jdbcSession.sql("""
                         SELECT priority FROM tasks
@@ -484,14 +476,13 @@ public class Tests extends InitializedTestContainer {
                 .set("test1")
                 .set("test1")
                 .insert(new SingleOutcome<>(UUID.class));
-        TaskDto taskDto = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest = new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         );
-        Task task = rpTask.add(taskDto, user_id);
+        Task task = rpTask.add(taskEntityRequest, user_id);
         try {
             rpTask.editPriority(task.id(), Priority.medium, user_id1);
         } catch (NotAvailableException e) {
@@ -510,14 +501,13 @@ public class Tests extends InitializedTestContainer {
                 .set("test1")
                 .set("test1")
                 .insert(new SingleOutcome<>(UUID.class));
-        TaskDto taskDto = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest = new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         );
-        Task task = rpTask.add(taskDto, user_id);
+        Task task = rpTask.add(taskEntityRequest, user_id);
         rpTask.editStatus(task.id(), Status.IN_PROGRESS, user_id);
         assertEquals(Status.IN_PROGRESS, jdbcSession.sql("""
                         SELECT status FROM tasks
@@ -561,14 +551,13 @@ public class Tests extends InitializedTestContainer {
                 .set("test2")
                 .set("test2")
                 .insert(new SingleOutcome<>(UUID.class));
-        TaskDto taskDto = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest = new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         );
-        Task task = rpTask.add(taskDto, user_id);
+        Task task = rpTask.add(taskEntityRequest, user_id);
         rpTask.assign(task.id(), user_id1, user_id);
         rpTask.editStatus(task.id(), Status.IN_PROGRESS, user_id1);
         assertEquals(Status.IN_PROGRESS, jdbcSession.sql("""
@@ -613,14 +602,13 @@ public class Tests extends InitializedTestContainer {
                 .set("test1")
                 .set("test1")
                 .insert(new SingleOutcome<>(UUID.class));
-        TaskDto taskDto = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest = new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         );
-        Task task = rpTask.add(taskDto, user_id);
+        Task task = rpTask.add(taskEntityRequest, user_id);
         try {
             rpTask.editStatus(task.id(), Status.IN_PROGRESS, user_id1);
         } catch (NotAvailableException e) {
@@ -639,14 +627,13 @@ public class Tests extends InitializedTestContainer {
                 .set("test1")
                 .set("test1")
                 .insert(new SingleOutcome<>(UUID.class));
-        TaskDto taskDto = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest = new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         );
-        Task task = rpTask.add(taskDto, user_id);
+        Task task = rpTask.add(taskEntityRequest, user_id);
         assertEquals(rpUser.get(user_id), task.creatorUser());
     }
 
@@ -667,14 +654,13 @@ public class Tests extends InitializedTestContainer {
                 .set("test2")
                 .set("test2")
                 .insert(new SingleOutcome<>(UUID.class));
-        TaskDto taskDto = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest = new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         );
-        Task task = rpTask.add(taskDto, user_id);
+        Task task = rpTask.add(taskEntityRequest, user_id);
         rpTask.assign(task.id(), user_id1, user_id);
         assertEquals(rpUser.get(user_id1), task.assignedUser());
     }
@@ -689,27 +675,24 @@ public class Tests extends InitializedTestContainer {
                 .set("test1")
                 .set("test1")
                 .insert(new SingleOutcome<>(UUID.class));
-        TaskDto taskDto = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest = new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         );
-        Task task = rpTask.add(taskDto, user_id);
+        Task task = rpTask.add(taskEntityRequest, user_id);
         assertEquals(0, task.comments().size());
 
-        CommentDto commentDto1 = new CommentDto(
-                null,
+        CommentEntityRequest commentEntityRequest1 = new CommentEntityRequest(
                 "test"
         );
-        CommentDto commentDto2 = new CommentDto(
-                null,
+        CommentEntityRequest commentEntityRequest2 = new CommentEntityRequest(
                 "test2"
         );
         List<Comment> comments = new ArrayList<>();
-        comments.add(rpComment.add(commentDto1, user_id, task.id()));
-        comments.add(rpComment.add(commentDto2, user_id, task.id()));
+        comments.add(rpComment.add(commentEntityRequest1, user_id, task.id()));
+        comments.add(rpComment.add(commentEntityRequest2, user_id, task.id()));
         assertEquals(comments, task.comments());
 
     }
@@ -718,26 +701,23 @@ public class Tests extends InitializedTestContainer {
     public void addCommentTest() throws SQLException, NoDataException {
         JdbcSession jdbcSession = new JdbcSession(dataSource);
         rpUser = new RpUser(dataSource);
-        UUID userId = rpUser.add(new UserDto(
-                null,
+        UUID userId = rpUser.add(new UserEntityRequest(
                 "test",
                 "test"
         )).id();
 
-        UUID taskId = rpTask.add(new TaskDto(
-                null,
+        UUID taskId = rpTask.add(new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         ), userId).id();
 
-        CommentDto commentDto = new CommentDto(
-                null,
+        CommentEntityRequest commentEntityRequest = new CommentEntityRequest(
                 "test"
         );
 
-        Comment comment = rpComment.add(commentDto, userId, taskId);
+        Comment comment = rpComment.add(commentEntityRequest, userId, taskId);
         Comment expected = jdbcSession
                 .sql("SELECT * FROM comments WHERE id = ?")
                 .set(comment.id())
@@ -759,59 +739,52 @@ public class Tests extends InitializedTestContainer {
 
     @Test
     public void getCommentTest() throws SQLException, NoDataException {
-        UUID userId = rpUser.add(new UserDto(
-                null,
+        UUID userId = rpUser.add(new UserEntityRequest(
                 "test",
                 "test"
         )).id();
 
-        UUID taskId = rpTask.add(new TaskDto(
-                null,
+        UUID taskId = rpTask.add(new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         ),  userId).id();
 
-        CommentDto commentDto = new CommentDto(
-                null,
+        CommentEntityRequest commentEntityRequest = new CommentEntityRequest(
                 "test"
         );
 
-        Comment comment = rpComment.add(commentDto, userId, taskId);
+        Comment comment = rpComment.add(commentEntityRequest, userId, taskId);
         Optional<Comment> expected = rpComment.get(comment.id());
         assertEquals(expected.get(), comment);
     }
 
     @Test
     public void deleteAllForTaskTest() throws SQLException, NoDataException {
-        UUID userId = rpUser.add(new UserDto(
-                null,
+        UUID userId = rpUser.add(new UserEntityRequest(
                 "test",
                 "test"
         )).id();
 
-        UUID taskId = rpTask.add(new TaskDto(
-                null,
+        UUID taskId = rpTask.add(new TaskEntityRequest(
                 "test",
                 "test",
                 Status.NEW,
                 Priority.low
         ),  userId).id();
 
-        CommentDto commentDto = new CommentDto(
-                null,
+        CommentEntityRequest commentEntityRequest = new CommentEntityRequest(
                 "test"
         );
-        rpComment.add(commentDto, userId, taskId);
+        Comment commentAdd = rpComment.add(commentEntityRequest, userId, taskId);
         rpComment.deleteAllForTask(taskId);
 
-        Optional<Comment> comment = rpComment.get(commentDto.id());
+        Optional<Comment> comment = rpComment.get(commentAdd.id());
         assertEquals(Optional.empty(), comment);
     }
 
-    UserDto userDto = new UserDto(
-            null,
+    UserEntityRequest userEntityRequest = new UserEntityRequest(
             "test",
             "test"
     );
@@ -819,7 +792,7 @@ public class Tests extends InitializedTestContainer {
     @Test
     public void addUserTest() throws SQLException {
         JdbcSession jdbcSession = new JdbcSession(dataSource);
-        User user = rpUser.add(userDto);
+        User user = rpUser.add(userEntityRequest);
 
         User expected = jdbcSession.sql("""
                             SELECT id, email, password from users
@@ -843,7 +816,7 @@ public class Tests extends InitializedTestContainer {
 
     @Test
     public void getUserTest() throws SQLException, NoDataException {
-        User user = rpUser.add(userDto);
+        User user = rpUser.add(userEntityRequest);
         Optional<User> expected = rpUser.get(user.id());
 
         if (expected.isEmpty()) {
@@ -855,17 +828,15 @@ public class Tests extends InitializedTestContainer {
 
     @Test
     public void createdTasksTest() throws SQLException, NoDataException {
-        User user = rpUser.add(userDto);
-        assertEquals(0, user.createdTasks().size());
-        TaskDto taskDto1 = new TaskDto(
-                null,
+        User user = rpUser.add(userEntityRequest);
+        assertEquals(0, user.createdTasks(paginationEntityRequest).size());
+        TaskEntityRequest taskEntityRequest1 = new TaskEntityRequest(
                 "test1",
                 "test1",
                 Status.NEW,
                 Priority.medium
         );
-        TaskDto taskDto2 = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest2 = new TaskEntityRequest(
                 "test2",
                 "test2",
                 Status.NEW,
@@ -873,48 +844,45 @@ public class Tests extends InitializedTestContainer {
         );
         List<Task> tasks = new ArrayList<>();
 
-        tasks.add(rpTask.add(taskDto1, user.id()));
-        tasks.add(rpTask.add(taskDto2, user.id()));
+        tasks.add(rpTask.add(taskEntityRequest1, user.id()));
+        tasks.add(rpTask.add(taskEntityRequest2, user.id()));
 
-        assertEquals(tasks, user.createdTasks());
+        assertEquals(tasks, user.createdTasks(paginationEntityRequest));
 
     }
 
     @Test
     public void assignedTasksTest() throws SQLException, NoDataException, NotAvailableException {
-        User user = rpUser.add(userDto);
-        User user1 = rpUser.add(userDto);
-        TaskDto taskDto1 = new TaskDto(
-                null,
+        User user = rpUser.add(userEntityRequest);
+        User user1 = rpUser.add(userEntityRequest);
+        TaskEntityRequest taskEntityRequest1 = new TaskEntityRequest(
                 "test1",
                 "test1",
                 Status.NEW,
                 Priority.medium
         );
-        TaskDto taskDto2 = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest2 = new TaskEntityRequest(
                 "test2",
                 "test2",
                 Status.NEW,
                 Priority.medium
         );
-        TaskDto taskDto3 = new TaskDto(
-                null,
+        TaskEntityRequest taskEntityRequest3 = new TaskEntityRequest(
                 "test3",
                 "test3",
                 Status.NEW,
                 Priority.medium
         );
         List<Task> tasks = new ArrayList<>();
-        rpTask.add(taskDto3, user.id());
-        tasks.add(rpTask.add(taskDto1, user.id()));
-        tasks.add(rpTask.add(taskDto2, user.id()));
+        rpTask.add(taskEntityRequest3, user.id());
+        tasks.add(rpTask.add(taskEntityRequest1, user.id()));
+        tasks.add(rpTask.add(taskEntityRequest2, user.id()));
 
         rpTask.assign(tasks.get(0).id(), user1.id(), user.id());
         rpTask.assign(tasks.get(1).id(), user1.id(), user.id());
 
-        assertEquals(tasks, user1.assignedTasks());
-        assertEquals(0, user.assignedTasks().size());
+        assertEquals(tasks, user1.assignedTasks(paginationEntityRequest));
+        assertEquals(0, user.assignedTasks(paginationEntityRequest).size());
 
     }
 

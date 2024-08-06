@@ -6,7 +6,7 @@ services:
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: taskmenedgerdb
+      POSTGRES_DB: taskmanagementdb
     volumes:
       - ./vr__31072024.sql:/docker-entrypoint-initdb.d/vr__31072024.sql
     ports:
@@ -25,11 +25,11 @@ services:
       db:
         condition: service_healthy
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/taskmenedgerdb
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/taskmanagementdb
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: password
     ports:
-      - "8081:8081"
+      - "8080:8080"
     networks:
       - app-network
 
