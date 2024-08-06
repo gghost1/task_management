@@ -8,6 +8,9 @@ import com.example.exceptions.NoDataException;
 import com.example.response.BasicResponce;
 import com.example.response.entityResponse.TaskEntityResponse;
 import com.example.security.JwtUtils;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -20,12 +23,14 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/")
 @AllArgsConstructor
+@Tag(name = "Basic", description = "Basic operations")
 public class HomeEndPoints {
     RpTask rpTask;
     RpUser rpUser;
     JwtUtils jwtUtils;
 
     @PostMapping("/createTask")
+    @Operation(summary = "Create task by user", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<?> createTask(@Valid @RequestBody TaskDto taskDto, HttpServletRequest request) throws SQLException, NoDataException {
         String jwt = request.getHeader("Authorization").substring(7);
         UUID id = UUID.fromString(jwtUtils

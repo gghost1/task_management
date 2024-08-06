@@ -15,9 +15,11 @@ import com.example.exceptions.NotValidParam;
 import com.example.response.BasicResponce;
 import com.example.response.entityResponse.TaskEntityResponse;
 import com.example.security.JwtUtils;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -29,6 +31,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/tasks")
 @AllArgsConstructor
+@Tag(name = "Tasks", description = "API for task operations")
 public class TaskEndPoints {
 
     RpTask rpTask;
@@ -37,12 +40,14 @@ public class TaskEndPoints {
     RpComment rpComment;
 
     @GetMapping("/")
+    @Operation(summary = "Get all tasks with pagination", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<?> getTasks(@Valid PaginationDto paginationDto, HttpServletRequest request) throws SQLException {
         String jwt = jwtUtils.getJwtToken(request);
 
         return ResponseEntity.ok(new BasicResponce<>(jwt, TaskEntityResponse.from(rpTask.getAll(paginationDto))));
     }
     @GetMapping("/{id}")
+    @Operation(summary = "Get specified task by id", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<?> getTask(@PathVariable UUID id, HttpServletRequest request) throws SQLException, NoDataException {
         String jwt = jwtUtils.getJwtToken(request);
 
@@ -54,6 +59,7 @@ public class TaskEndPoints {
         return ResponseEntity.ok(new BasicResponce<>(jwt, TaskEntityResponse.from(task.get())));
     }
     @PostMapping("/{id}/addComment")
+    @Operation(summary = "Add comment to specified task by id", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<?> addComment(@PathVariable UUID id, @Valid @RequestBody CommentDto commentDto, HttpServletRequest request) throws SQLException, NoDataException {
         String jwt = jwtUtils.getJwtToken(request);
         rpComment.add(commentDto, UUID.fromString(jwtUtils.getIdFromJwtToken(jwt)), id);
@@ -64,6 +70,7 @@ public class TaskEndPoints {
         return ResponseEntity.ok(new BasicResponce<>(jwt, TaskEntityResponse.from(task.get())));
     }
     @PostMapping("/{id}/assign")
+    @Operation(summary = "Assign user to specified task by id", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<?> assign(@PathVariable UUID id, @RequestBody UUID userToAssign_id, HttpServletRequest request) throws SQLException, NoDataException, NotAvailableException {
         String jwt = jwtUtils.getJwtToken(request);
         Task task = rpTask.assign(id, userToAssign_id, UUID.fromString(jwtUtils.getIdFromJwtToken(jwt)));
@@ -71,18 +78,21 @@ public class TaskEndPoints {
     }
 
     @PostMapping("/{id}/editTitle")
+    @Operation(summary = "Edit title of specified task by id", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<?> editTitle(@PathVariable UUID id, @RequestBody String title, HttpServletRequest request) throws SQLException, NoDataException, NotAvailableException {
         String jwt = jwtUtils.getJwtToken(request);
         Task task = rpTask.editTitle(id, title, UUID.fromString(jwtUtils.getIdFromJwtToken(jwt)));
         return ResponseEntity.ok(new BasicResponce<>(jwt, TaskEntityResponse.from(task)));
     }
     @PostMapping("/{id}/editDescription")
+    @Operation(summary = "Edit description of specified task by id", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<?> editDescription(@PathVariable UUID id, @RequestBody String description, HttpServletRequest request) throws SQLException, NoDataException, NotAvailableException {
         String jwt = jwtUtils.getJwtToken(request);
         Task task = rpTask.editDescription(id, description, UUID.fromString(jwtUtils.getIdFromJwtToken(jwt)));
         return ResponseEntity.ok(new BasicResponce<>(jwt, TaskEntityResponse.from(task)));
     }
     @PostMapping("/{id}/editStatus")
+    @Operation(summary = "Edit status of specified task by id", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<?> editStatus(@PathVariable UUID id, @RequestBody String status, HttpServletRequest request) throws SQLException, NoDataException, NotAvailableException {
         String jwt = jwtUtils.getJwtToken(request);
         try {
@@ -94,6 +104,7 @@ public class TaskEndPoints {
         return ResponseEntity.ok(new BasicResponce<>(jwt, TaskEntityResponse.from(task)));
     }
     @PostMapping("/{id}/editPriority")
+    @Operation(summary = "Edit priority of specified task by id", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<?> editPriority(@PathVariable UUID id, @RequestBody String priority, HttpServletRequest request) throws SQLException, NoDataException, NotAvailableException {
         String jwt = jwtUtils.getJwtToken(request);
         try {
@@ -106,6 +117,7 @@ public class TaskEndPoints {
     }
 
     @PostMapping("/{id}/delete")
+    @Operation(summary = "Delete specified task by id", security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<?> delete(@PathVariable UUID id, HttpServletRequest request) throws SQLException, NoDataException, NotAvailableException {
         String jwt = jwtUtils.getJwtToken(request);
         rpTask.delete(id, UUID.fromString(jwtUtils.getIdFromJwtToken(jwt)));

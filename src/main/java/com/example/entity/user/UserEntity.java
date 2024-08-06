@@ -1,10 +1,12 @@
 package com.example.entity.user;
 
+import com.example.dto.PaginationDto;
 import com.example.dto.TaskDto;
 import com.example.entity.task.RpTask;
 import com.example.entity.task.Task;
 import com.example.exceptions.NoDataException;
 import com.jcabi.jdbc.JdbcSession;
+import jakarta.validation.Valid;
 
 import javax.sql.DataSource;
 import java.awt.desktop.OpenFilesEvent;
@@ -22,14 +24,17 @@ public record UserEntity(
 ) implements User {
 
     @Override
-    public List<Task> createdTasks() throws SQLException {
+    public List<Task> createdTasks(@Valid PaginationDto paginationDto) throws SQLException {
         RpTask rpTask = new RpTask(dataSource);
         JdbcSession jdbcSession = new JdbcSession(dataSource);
         return jdbcSession.sql("""
                 SELECT task_id FROM user_author_tasks
                 WHERE user_id = ?
+                LIMIT ? OFFSET ?
                 """)
                 .set(id)
+                .set(paginationDto.size())
+                .set(paginationDto.offset())
                 .select((resultSet, statement) -> {
                     List<UUID> taskIds = new ArrayList<>();
                     while (resultSet.next()) {
@@ -47,14 +52,17 @@ public record UserEntity(
     }
 
     @Override
-    public List<Task> assignedTasks() throws SQLException {
+    public List<Task> assignedTasks(@Valid PaginationDto paginationDto) throws SQLException {
         RpTask rpTask = new RpTask(dataSource);
         JdbcSession jdbcSession = new JdbcSession(dataSource);
         return jdbcSession.sql("""
                 SELECT task_id FROM user_executor_tasks
                 WHERE user_id = ?
+                LIMIT ? OFFSET ?
                 """)
                 .set(id)
+                .set(paginationDto.size())
+                .set(paginationDto.offset())
                 .select((resultSet, statement) -> {
                     List<UUID> taskIds = new ArrayList<>();
                     while (resultSet.next()) {
@@ -69,15 +77,5 @@ public record UserEntity(
                         throw new RuntimeException(e);
                     }
                 }).toList();
-    }
-
-    @Override
-    public void createTask(TaskDto task) throws SQLException {
-        RpTask rpTask = new RpTask(dataSource);
-        try {
-            rpTask.add(task, id);
-        } catch (NoDataException e) {
-            throw new RuntimeException(e);
-        }
     }
 }

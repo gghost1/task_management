@@ -9,6 +9,9 @@ import com.example.response.BasicResponce;
 import com.example.security.JwtUtils;
 import com.example.security.SecurityConfig;
 import com.example.security.UserEntityDetails;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +33,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/")
 @AllArgsConstructor
+@Tag(name = "Anonymous")
 public class AnonymousEndPoints {
     AuthenticationManager authenticationManager;
 
@@ -42,6 +46,7 @@ public class AnonymousEndPoints {
     RpUser rpUser = new RpUser(dataSource);
 
     @PostMapping("/register")
+    @Operation(summary = "Register new user and login him")
     public ResponseEntity<?> register(@Valid @RequestBody UserDto userDto) throws SQLException, NoDataException, NotValidParam {
 
             Optional<User> user = rpUser.getByEmail(userDto.email());
@@ -54,6 +59,7 @@ public class AnonymousEndPoints {
         return login(userDto);
     }
     @PostMapping("/login")
+    @Operation(summary = "Login user")
     public ResponseEntity<?> login(@Valid @RequestBody UserDto userDto) throws SQLException, NoDataException {
 
         Optional<User> userOpt = rpUser.getByEmail(userDto.email());
